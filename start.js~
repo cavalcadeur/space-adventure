@@ -1,0 +1,160 @@
+var W,H;
+var ctx,canvas;
+var X = 0;
+var Y = 0;
+var Widget;
+var square;
+var keys = [];
+var mortalite = 10;
+var action = 400;
+var planetSize;
+var v = 1000;
+var object = [{r:0.1,y:400,s:15},{r:6.4,y:100,s:9},{r:0.7,y:300,s:30},{r:1,y:150,s:50},{r:1.1,y:400,s:15},{r:2.4,y:100,s:9},{r:2.7,y:300,s:30},{r:1.5,y:150,s:70},{r:3.1,y:100,s:5},{r:5.4,y:50,s:18},{r:4.7,y:240,s:25},{r:4.5,y:10,s:18},{r:1.7,y:240,s:25},{r:0.4,y:50,s:18},{r:-0.5,y:240,s:14},{r:2.5,y:10,s:18},{r:2.7,y:240,s:45}];
+var fleur = [{n:0},{n:10},{n:5},{n:7},{n:8},{n:15},{n:11},{n:14}];
+var scrollX = 0;
+var t2 = 0;
+var t3 = 0;
+var vaisseau = new Image();
+vaisseau.src = "images/boxe.png";
+var imgFleur = new Image();
+imgFleur.src = "images/fleur0.png";
+var mouse = [0,0];
+var dead = 0;
+
+// programme
+
+function rnd(max){
+    return Math.floor(Math.floor(Math.random()*max));
+}
+
+function resize(){
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.setAttribute("width",W);
+    canvas.setAttribute("height",H);
+    planetSize = W - 1000;
+}
+
+function start(){
+    canvas = document.querySelector("#canvas");
+    ctx = canvas.getContext("2d");
+    W = canvas.width;
+    H = canvas.height;
+    resize();
+    Widget = require("wdg");
+    square = new Widget({id: "square"});
+    document.addEventListener(
+        "mousemove",
+        function (event){
+            mouse[1] = event.clientX;
+            mouse[0] = event.clientY;
+        }
+    );
+    document.addEventListener(
+        "mousedown",
+        function (event){
+            if (dead == 1){
+                disalert();
+                dead = 0;
+                t3 = 0;
+                v = 1000;
+            }
+        }
+    );
+    animation();
+}
+
+function animation(){
+    var f = function(t) {
+        if (dead == 0)paint(t);
+        else if (dead == 1) draw(t);
+        //resize();
+        window.requestAnimationFrame(f);
+    };
+    window.requestAnimationFrame(f);
+}
+
+function paint(t){
+    object.forEach(
+        function(e){
+            if ((e.r - scrollX)%(Math.PI*2) < -3 && (e.r - scrollX)%(Math.PI*2) > -3.4){
+                e.s = rnd(90) + 10;
+                e.y = rnd(H);
+            }            
+        }
+    );
+    scrollX += (t-t2)/v;
+    t3 += t-t2;
+    v -= (t-t2)/700;
+    draw(t);
+    collision(t3);
+}
+
+function draw(t) {
+    t2 = t;
+    drawFond();
+    if (dead == 0){
+        ctx.save();
+        ctx.translate(mouse[1],mouse[0]);
+        ctx.rotate(Math.atan((mouse[1] - W/2)/(H - mouse[0])));
+        ctx.drawImage(vaisseau,- vaisseau.width/2, - vaisseau.height/2);
+        ctx.restore();
+    }
+
+//    if (dead == 0) ctx.drawImage(vaisseau,mouse[1]  - vaisseau.width/2,mouse[0] - vaisseau.height/2);
+    ctx.fillStyle = "rgb(40,40,40)";
+    ctx.beginPath();
+    ctx.arc(W/2,H,planetSize,-Math.PI,Math.PI);
+    ctx.closePath();
+    //ctx.stroke();
+    ctx.fill();
+    object.forEach(
+        function(e){
+            ctx.save();
+            ctx.translate(W/2,H);
+            ctx.rotate(e.r - scrollX);
+            ctx.beginPath();
+            ctx.arc(0,-e.y - planetSize,e.s,-Math.PI,Math.PI);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+    );
+    fleur.forEach(
+        function(e){
+            ctx.save();
+            ctx.translate(W/2,H);
+            ctx.rotate(object[e.n].r - scrollX);
+            ctx.drawImage(imgFleur,- 25,- object[e.n].y - planetSize - 45 - object[e.n].s);
+            ctx.restore();
+        }
+    );
+}
+
+function drawFond() {
+    ctx.fillStyle = "rgb(28,134,182)";
+    ctx.fillRect(0,0,W,H);
+}
+
+function collision(t) {
+    if (Math.hypot(mouse[0] - H,mouse[1] - W/2) < planetSize + 20) mort(t);
+//    ctx.fillStyle = "rgb(255,255,255)";
+    object.forEach(
+        function(e){
+            var x = (e.y+planetSize) * Math.sin((e.r - scrollX)%(Math.PI*2)) + W/2;
+            var y = H - ((e.y+planetSize) * Math.cos((e.r - scrollX)%(Math.PI*2)));
+            //ctx.fillRect(x,y,5,5);
+            if (Math.hypot(mouse[0] - y,mouse[1] - x) < e.s + 20) mort(t);
+        }
+    );
+}
+
+function mort(t){
+    dead = 1;
+    score = "Vous avez tenu " + Math.round(t/1000) + " secondes.";
+    alert(score);
+    for (var iii = 0; iii < 10; iii++) {
+        var taille = rnd(100) + 100;
+        newExplosion(mouse[1] - 40 + rnd(20) + "px",mouse[0] - 95 + rnd(20)  + "px",mouse[1] - 150 + rnd(200) + "px",mouse[0] - 205 + rnd(200)+ "px", taille + "px",0,1);
+    }
+}
