@@ -10,7 +10,7 @@ var action = 400;
 var planetSize;
 var v = 1000;
 var object = [{r:3.7,y:300,s:30},{r:2,y:150,s:50},{r:2.1,y:400,s:15},{r:3.4,y:100,s:9},{r:3.7,y:300,s:30},{r:2.5,y:150,s:70},{r:4.1,y:100,s:5},{r:6.4,y:50,s:18},{r:5.7,y:240,s:25},{r:5.5,y:10,s:18},{r:2.7,y:240,s:25},{r:1.4,y:50,s:18},{r:-1.5,y:240,s:14},{r:3.5,y:10,s:18},{r:3.7,y:240,s:45}];
-var fleur = [{n:0,r:2,t:1},{n:1,r:5,t:0},{n:2,r:0,t:2},{n:3,r:0.5,t:0},{n:4,r:4.2,t:0},{n:5,r:3.8,t:2},{n:6,r:5,t:1},{n:7,r:2.2,t:0},{n:8,r:0.2,t:0},{n:9,r:3.2,t:0},{n:10,r:2.8,t:0},{n:11,r:5,t:0},{n:12,r:0,t:1},{n:13,r:1,t:1},{n:14,r:4.7,t:2},{n:8,r:4.7,t:1},{n:12,r:4.3,t:0}];
+var fleur = [{n:0,r:2,t:1},{n:1,r:5,t:0},{n:2,r:0,t:2},{n:3,r:0.5,t:0},{n:4,r:4.2,t:0},{n:5,r:3.8,t:2},{n:6,r:5,t:1},{n:7,r:2.2,t:0},{n:8,r:0.2,t:0},{n:9,r:3.2,t:0},{n:10,r:2.8,t:0},{n:11,r:5,t:0},{n:12,r:0,t:1},{n:13,r:1,t:1},{n:14,r:4.7,t:2},{n:8,r:4.7,t:1},{n:12,r:4.3,t:0},{n:-1,r:5,t:0},{n:-1,r:0,t:1},{n:-1,r:1,t:1},{n:-1,r:4,t:2},{n:-1,r:4.7,t:1},{n:-1,r:-1.2,t:0},{n:-1,r:10.2,t:1},{n:-1,r:8.5,t:0}];
 var etoiles = [];
 var scrollX = 0;
 var t2 = 0;
@@ -167,12 +167,20 @@ function draw(t) {
     );
     fleur.forEach(
         function(e){
-            var x = (object[e.n].y+planetSize) * Math.sin((object[e.n].r - scrollX)%(Math.PI*2)) + W/2;
-            var y = H - ((object[e.n].y+planetSize) * Math.cos((object[e.n].r - scrollX)%(Math.PI*2)));
+            if (e.n == -1){
+                var x = W/2;
+                var y = H;
+                var s = planetSize;
+            }
+            else{
+                var x = (object[e.n].y+planetSize) * Math.sin((object[e.n].r - scrollX)%(Math.PI*2)) + W/2;
+                var y = H - ((object[e.n].y+planetSize) * Math.cos((object[e.n].r - scrollX)%(Math.PI*2)));
+                var s = object[e.n].s;
+            }
             ctx.save();
             ctx.translate(x,y);
             ctx.rotate(e.r - scrollX);
-            ctx.drawImage(imgFleur[e.t],- 25,- 45 - object[e.n].s);
+            ctx.drawImage(imgFleur[e.t],- 25,- 45 - s);
             ctx.restore();
         }
     );
