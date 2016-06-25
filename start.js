@@ -146,11 +146,6 @@ function draw(t) {
 
 //    if (dead == 0) ctx.drawImage(vaisseau,mouse[1]  - vaisseau.width/2,mouse[0] - vaisseau.height/2);
     ctx.fillStyle = "rgb(40,40,40)";
-    ctx.beginPath();
-    ctx.arc(W/2,H,planetSize,-Math.PI,Math.PI);
-    ctx.closePath();
-    //ctx.stroke();
-    ctx.fill();
     object.forEach(
         function(e){
             ctx.save();
@@ -182,6 +177,11 @@ function draw(t) {
             ctx.restore();
         }
     );
+    ctx.beginPath();
+    ctx.arc(W/2,H,planetSize,-Math.PI,Math.PI);
+    ctx.closePath();
+    //ctx.stroke();
+    ctx.fill();
 }
 
 function drawFond() {
