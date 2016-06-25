@@ -225,13 +225,15 @@ function collision(t) {
 
 function mort(t){
     dead = 1;
+    if (Math.round(t/1000) == 1) var pluriel = "";
+    else var pluriel = "s";
     if (Math.round(t/1000) >= record){
         record = Math.round(t/1000);
         window.localStorage.setItem("record",JSON.stringify(Math.round(t/1000)));
-        score = "Vous avez tenu " + Math.round(t/1000) + " secondes. C'est un nouveau record !!!";
+        score = "Vous avez tenu " + Math.round(t/1000) + " seconde"+pluriel+". C'est un nouveau record !!!";
     }
     else {
-        score = "Vous avez tenu " + Math.round(t/1000) + " secondes. Votre record est de " + record + " secondes.";
+        score = "Vous avez tenu " + Math.round(t/1000) + " seconde"+pluriel+". Votre record est de " + record + " secondes.";
     }
     alert(score);
     ready = 50;
