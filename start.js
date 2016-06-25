@@ -68,6 +68,8 @@ function start(){
     );
     mouse[1] = W/2;
     mouse[0] = H/2;
+    dead = 1;
+    alert("Bienvenue. Pour jouer, il suffit d'appuyer sur une touche ou de toucher l'écran sur un smartphone. Le but du jeu est de survivre le plus longtemps possible en évitant les obstacles.");
     animation();
 }
 
