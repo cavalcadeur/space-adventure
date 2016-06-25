@@ -229,7 +229,7 @@ function mort(t){
     else var pluriel = "s";
     if (record == 1) var pluriel2 = "";
     else var pluriel2 = "s";
-    if (Math.round(t/1000) >= record){
+    if (Math.round(t/1000) > record){
         record = Math.round(t/1000);
         window.localStorage.setItem("record",JSON.stringify(Math.round(t/1000)));
         score = "Vous avez tenu " + Math.round(t/1000) + " seconde"+pluriel+". C'est un nouveau record !!!";
