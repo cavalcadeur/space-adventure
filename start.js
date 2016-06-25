@@ -40,11 +40,9 @@ function resize(){
     H = window.innerHeight;
     canvas.setAttribute("width",W);
     canvas.setAttribute("height",H);
-    planetSize = H/3;
+    planetSize = H/4;
     if (planetSize < 0) planetSize = 10;
-    if (H < 400){
-        scaleFactor = H/800;
-    }
+    scaleFactor = H/800;
 }
 
 function start(){
