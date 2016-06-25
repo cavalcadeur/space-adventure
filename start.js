@@ -10,7 +10,8 @@ var action = 400;
 var planetSize;
 var v = 1000;
 var object = [{r:3.7,y:300,s:30},{r:2,y:150,s:50},{r:2.1,y:400,s:15},{r:3.4,y:100,s:9},{r:3.7,y:300,s:30},{r:2.5,y:150,s:70},{r:4.1,y:100,s:5},{r:6.4,y:50,s:18},{r:5.7,y:240,s:25},{r:5.5,y:10,s:18},{r:2.7,y:240,s:25},{r:1.4,y:50,s:18},{r:-1.5,y:240,s:14},{r:3.5,y:10,s:18},{r:3.7,y:240,s:45}];
-var fleur = [{n:0,r:2},{n:10,r:5},{n:5,r:0},{n:7,r:0.5},{n:8,r:4.2},{n:13,r:3.8},{n:11,r:5},{n:12,r:2.2}];;
+var fleur = [{n:0,r:2},{n:1,r:5},{n:2,r:0},{n:3,r:0.5},{n:4,r:4.2},{n:5,r:3.8},{n:6,r:5},{n:7,r:2.2},{n:8,r:0.2},{n:9,r:3.2},{n:10,r:2.8},{n:11,r:5},{n:12,r:0},{n:13,r:1},{n:14,r:4.7},{n:8,r:4.7},{n:12,r:4.3}];
+var etoiles = [];
 var scrollX = 0;
 var t2 = 0;
 var t3 = 0;
@@ -68,6 +69,10 @@ function start(){
     );
     mouse[1] = W/2;
     mouse[0] = H/2;
+    for (var i = 0;i < 20;i++){
+        etoiles.push({x:rnd(W),y:rnd(H),n:rnd(2)});
+    }
+    console.log(etoiles);
     dead = 1;
     alert("Bienvenue. Pour jouer, il suffit d'appuyer sur une touche ou de toucher l'écran sur un smartphone. Le but du jeu est de survivre le plus longtemps possible en évitant les obstacles.");
     animation();
@@ -175,6 +180,27 @@ function draw(t) {
 function drawFond() {
     ctx.fillStyle = "rgb(28,134,182)";
     ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = "rgb(255,255,250)";
+    ctx.globalAlpha = 0.4;
+    etoiles.forEach(
+        function(e){
+            if (e.n == 0) ctx.fillRect(e.x,e.y,3,3);
+            else if (e.n == 1){
+                ctx.beginPath();
+                ctx.moveTo(e.x - 2,e.y - 2);
+                ctx.lineTo(e.x,e.y - 10);
+                ctx.lineTo(e.x + 2,e.y - 2);
+                ctx.lineTo(e.x + 10,e.y);
+                ctx.lineTo(e.x + 2,e.y + 2);
+                ctx.lineTo(e.x,e.y + 10);
+                ctx.lineTo(e.x - 2,e.y + 2);
+                ctx.lineTo(e.x - 10,e.y);
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+    );
+    ctx.globalAlpha = 1;
 }
 
 function collision(t) {
