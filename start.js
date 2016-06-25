@@ -70,7 +70,7 @@ function start(){
     mouse[1] = W/2;
     mouse[0] = H/2;
     for (var i = 0;i < 20;i++){
-        etoiles.push({x:rnd(W),y:rnd(H),n:rnd(2)});
+        etoiles.push({x:rnd(W),y:rnd(H),n:rnd(3)});
     }
     console.log(etoiles);
     dead = 1;
@@ -184,7 +184,7 @@ function drawFond() {
     ctx.globalAlpha = 0.4;
     etoiles.forEach(
         function(e){
-            if (e.n == 0) ctx.fillRect(e.x,e.y,3,3);
+            if (e.n == 0 | e.n == 2) ctx.fillRect(e.x,e.y,3,3);
             else if (e.n == 1){
                 ctx.beginPath();
                 ctx.moveTo(e.x - 2,e.y - 2);
