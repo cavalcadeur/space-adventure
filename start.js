@@ -11,12 +11,15 @@ var planetSize;
 var v = 1000;
 var object = [{r:3.7,y:300,s:30},{r:2,y:150,s:50},{r:2.1,y:400,s:15},{r:3.4,y:100,s:9},{r:3.7,y:300,s:30},{r:2.5,y:150,s:70},{r:4.1,y:100,s:5},{r:1.4,y:50,s:18},{r:5.7,y:240,s:25},{r:5.5,y:10,s:18},{r:2.7,y:240,s:25},{r:1.4,y:50,s:18},{r:-1.5,y:240,s:14},{r:3.5,y:10,s:18},{r:3.7,y:240,s:45}];
 var fleur = [{n:0,r:2,t:1},{n:1,r:5,t:0},{n:2,r:0,t:2},{n:3,r:0.5,t:0},{n:4,r:4.2,t:0},{n:5,r:3.8,t:2},{n:6,r:5,t:1},{n:7,r:2.2,t:0},{n:8,r:0.2,t:0},{n:9,r:3.2,t:0},{n:10,r:2.8,t:0},{n:11,r:5,t:0},{n:12,r:0,t:1},{n:13,r:1,t:1},{n:14,r:4.7,t:2},{n:8,r:4.7,t:1},{n:12,r:4.3,t:0},{n:-1,r:5,t:0},{n:-1,r:0,t:1},{n:-1,r:1,t:1},{n:-1,r:4,t:2},{n:-1,r:4.7,t:1},{n:-1,r:-1.2,t:0},{n:-1,r:10.2,t:1},{n:-1,r:8.5,t:0}];
+var bonus = {r:2.4,y:200,t:0,on:1};
 var etoiles = [];
 var scrollX = 0;
 var t2 = 0;
 var t3 = 0;
 var vaisseau = new Image();
 vaisseau.src = "images/boxe.png";
+var imgBonus = [new Image()];
+imgBonus[0].src = "images/Bonus0.png";
 var imgFleur = [new Image(),new Image(),new Image()];
 imgFleur[0].src = "images/fleur0.png";
 imgFleur[1].src = "images/fleur1.png";
@@ -28,6 +31,7 @@ var init = 1;
 var ready = 0;
 var scaleFactor = 1;
 var record = JSON.parse(window.localStorage.getItem("record"));
+var sens = 1;
 
 // programme
 
@@ -88,6 +92,7 @@ function touching(){
             dead = 0;
             t3 = 0;
             v = 1000;
+            sens = 1;
             mouse[0] = H/2;
             scrollX = 0;
             init = 0;
@@ -117,13 +122,17 @@ function paint(t){
     }
     object.forEach(
         function(e){
-            if ((e.r - scrollX)%(Math.PI*2) < -3 && (e.r - scrollX)%(Math.PI*2) > -3.4){
+            if (((e.r - scrollX)*sens)%(Math.PI*2) < -3 && ((e.r - scrollX)*sens)%(Math.PI*2) > -3.4){
                 e.s = rnd(H/15) + 10;
                 e.y = rnd(H);
             }            
         }
     );
-    scrollX += (t-t2)/v;
+    if (((bonus.r - scrollX)*sens)%(Math.PI*2) < -3 && ((bonus.r - scrollX)*sens)%(Math.PI*2) > -3.4){
+        bonus.on = 1;
+        bonus.y = rnd(H);
+    }  
+    scrollX += (t-t2)/v * sens;
     t3 += t-t2;
     v -= (t-t2)/700;
     mouse[0] += gravite;
@@ -139,12 +148,19 @@ function draw(t) {
         ctx.save();
         ctx.translate(mouse[1],mouse[0]);
         ctx.rotate(Math.atan((mouse[1] - W/2)/(H - mouse[0])));
-        ctx.scale(scaleFactor,scaleFactor);
+        ctx.scale(scaleFactor*sens,scaleFactor);
         ctx.drawImage(vaisseau,- vaisseau.width/2, - vaisseau.height/2);
         ctx.restore();
     }
 
 //    if (dead == 0) ctx.drawImage(vaisseau,mouse[1]  - vaisseau.width/2,mouse[0] - vaisseau.height/2);
+    if (bonus.on == 1){
+        ctx.save();
+        ctx.translate(W/2,H);
+        ctx.rotate(bonus.r - scrollX);
+        ctx.drawImage(imgBonus[bonus.t],0,-bonus.y - 15 - planetSize);
+        ctx.restore();        
+    }
     ctx.fillStyle = "rgb(40,40,40)";
     object.forEach(
         function(e){
@@ -211,6 +227,11 @@ function drawFond() {
 }
 
 function collision(t) {
+    if (bonus.on == 1){
+        var x = (bonus.y+planetSize) * Math.sin((bonus.r - scrollX)%(Math.PI*2)) + W/2;
+        var y = H - ((bonus.y+planetSize) * Math.cos((bonus.r - scrollX)%(Math.PI*2)));
+        if (Math.hypot(mouse[0] - y,mouse[1] - x) < 15 + 20*scaleFactor){sens = sens*-1;bonus.on = 0;}
+    }
     if (Math.hypot(mouse[0] - H,mouse[1] - W/2) < planetSize + 20*scaleFactor) mort(t);
 //    ctx.fillStyle = "rgb(255,255,255)";
     object.forEach(
