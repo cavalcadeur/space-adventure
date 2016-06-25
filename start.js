@@ -76,7 +76,7 @@ function start(){
     }
     console.log(etoiles);
     dead = 1;
-    alert("Bienvenue. Pour jouer, il suffit d'appuyer sur une touche ou de toucher l'écran sur un smartphone afin de faire voler votre vaisseau. Le but du jeu est de survivre le plus longtemps possible en évitant les obstacles.");
+    alert("Bienvenue. Appuyer sur la barre espace ou l'écran de votre smartPhone pour faire voler votre vaisseau spatial. Le but du jeu est de survivre le plus longtemps possible en évitant les obstacles.");
     animation();
 }
 
