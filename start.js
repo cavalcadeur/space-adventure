@@ -80,7 +80,7 @@ function start(){
 
 function touching(){
     if (dead == 0){
-        gravite = -9;
+        if (mouse[0] > 0 )gravite = -9;
     }
     else {
         if (ready == 0){
