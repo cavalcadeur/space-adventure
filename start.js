@@ -24,6 +24,14 @@ var imgFleur = [new Image(),new Image(),new Image()];
 imgFleur[0].src = "images/fleur0.png";
 imgFleur[1].src = "images/fleur1.png";
 imgFleur[2].src = "images/fleur2.png";
+var img = {shop:"prout"};
+var imgLoad = ["shop"];
+imgLoad.forEach(
+    function(e,i){
+        img[e] = new Image();
+        img[e].src = "images/"+e+".png";
+    }
+);
 var mouse = [0,0];
 var dead = 0;
 var gravite = -9;
@@ -32,6 +40,9 @@ var ready = 0;
 var scaleFactor = 1;
 var record = JSON.parse(window.localStorage.getItem("record"));
 var sens = 1;
+var shop = 0;
+var son = new Audio("music.ogg");
+var mode = 0;
 
 // programme
 
@@ -50,6 +61,8 @@ function resize(){
 }
 
 function start(){
+    son.loop = true;
+    son.play();
     canvas = document.querySelector("#canvas");
     ctx = canvas.getContext("2d");
     W = canvas.width;
@@ -67,8 +80,20 @@ function start(){
     document.addEventListener(
         "touchstart",
         function (event){
-            touching();
+            var x = event.clientX;
+            var y = event.clientY;
+            resize();
+            if (mode == 0) smartPhoneMode();
+            touching(x,y);
             
+        }
+    );
+        document.addEventListener(
+        "mousedown",
+            function (event){
+                var x = event.clientX;
+                var y = event.clientY;
+                touching(x,y);            
         }
     );
     mouse[1] = W/2;
@@ -82,12 +107,19 @@ function start(){
     animation();
 }
 
-function touching(){
+function touching(x,y){
+    if (x == undefined) {x = -9000;y=-9000;}
     if (dead == 0){
         if (mouse[0] > 0 )gravite = -9;
     }
     else {
-        if (ready == 0){
+        if ((x-W/2)*(x-W/2) + (y-H)*(y-H) < planetSize*planetSize){
+            if (record == 1883){
+
+            }
+            else alert("Cette fonctionnalité est en cours de developpement. En attendant vous pouvez toujours faire des dons. A 5€, il est prévu que sorte la version deluxe du jeu.");
+        }
+        else if (ready == 0){
             disalert();
             dead = 0;
             t3 = 0;
@@ -97,7 +129,12 @@ function touching(){
             scrollX = 0;
             init = 0;
             gravite = -9;
-            object = [{r:3.7,y:300,s:30},{r:2,y:150,s:50},{r:2.1,y:400,s:15},{r:3.4,y:100,s:9},{r:3.7,y:300,s:30},{r:2.5,y:150,s:70},{r:4.1,y:100,s:5},{r:1.4,y:50,s:18},{r:5.7,y:240,s:25},{r:5.5,y:10,s:18},{r:2.7,y:240,s:25},{r:1.4,y:50,s:18},{r:-1.5,y:240,s:14},{r:3.5,y:10,s:18},{r:3.7,y:240,s:45}];
+            if (mode == 0){
+                object = [{r:3.7,y:300,s:30},{r:2,y:150,s:50},{r:2.1,y:400,s:15},{r:3.4,y:100,s:9},{r:3.7,y:300,s:30},{r:2.5,y:150,s:70},{r:4.1,y:100,s:5},{r:1.4,y:50,s:18},{r:5.7,y:240,s:25},{r:5.5,y:10,s:18},{r:2.7,y:240,s:25},{r:1.4,y:50,s:18},{r:-1.5,y:240,s:14},{r:3.5,y:10,s:18},{r:3.7,y:240,s:45}];
+            }
+            else {
+                object = [{r:3.7,y:300,s:30},{r:2,y:150,s:50},{r:2.1,y:400,s:15},{r:3.4,y:100,s:9},{r:2.5,y:150,s:70},{r:4.1,y:100,s:5},{r:5.7,y:240,s:25},{r:5.5,y:10,s:18},{r:1.4,y:50,s:18},{r:-1.5,y:240,s:14},{r:3.7,y:240,s:45}];
+            }
         }
     }
 }
@@ -110,7 +147,8 @@ function animation(){
             draw(t);
         }
         //resize();
-        window.requestAnimationFrame(f);
+        if (shop == 0) window.requestAnimationFrame(f);
+        else drawShop();
     };
     window.requestAnimationFrame(f);
 }
@@ -198,6 +236,10 @@ function draw(t) {
     ctx.closePath();
     //ctx.stroke();
     ctx.fill();
+    
+    if (dead == 1){
+        ctx.drawImage(img.shop,W/2-planetSize,H-planetSize,planetSize*2,planetSize);
+    }
 }
 
 function drawFond() {
@@ -259,9 +301,15 @@ function mort(t){
         score = "Vous avez tenu " + Math.round(t/1000) + " seconde"+pluriel+". Votre record est de " + record + " seconde"+pluriel2+".";
     }
     alert(score);
-    ready = 50;
+    ready = 20;
     for (var iii = 0; iii < 10; iii++) {
         var taille = rnd(100) + 100;
         newExplosion(mouse[1] - 40 + rnd(20) + "px",mouse[0] - 95 + rnd(20)  + "px",mouse[1] - 150 + rnd(200) + "px",mouse[0] - 205 + rnd(200)+ "px", taille + "px",0,1);
     }
+}
+
+function smartPhoneMode(){
+    mode = 1;
+    object = [{r:3.7,y:300,s:30},{r:2,y:150,s:50},{r:2.1,y:400,s:15},{r:3.4,y:100,s:9},{r:2.5,y:150,s:70},{r:4.1,y:100,s:5},{r:5.7,y:240,s:25},{r:5.5,y:10,s:18},{r:1.4,y:50,s:18},{r:-1.5,y:240,s:14},{r:3.7,y:240,s:45}];
+    fleur = [{n:0,r:2,t:1},{n:1,r:5,t:0},{n:2,r:0,t:2},{n:3,r:0.5,t:0},{n:4,r:4.2,t:0},{n:5,r:3.8,t:2},{n:6,r:5,t:1},{n:7,r:2.2,t:0},{n:8,r:0.2,t:0}];
 }
