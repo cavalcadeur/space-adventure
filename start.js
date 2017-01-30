@@ -17,8 +17,7 @@ var etoiles = [];
 var scrollX = 0;
 var t2 = 0;
 var t3 = 0;
-var vaisseau = new Image();
-vaisseau.src = "images/boxe0.png";
+var vaisseau = 0;
 var imgBonus = [new Image()];
 imgBonus[0].src = "images/bonus0.png";
 var imgFleur = [new Image(),new Image(),new Image()];
@@ -27,8 +26,8 @@ imgFleur[1].src = "images/fleur1.png";
 imgFleur[2].src = "images/fleur2.png";
 var eng = new Image();
 eng.src = "images/engre.png";
-var img = {shop:"prout"};
-var imgLoad = ["shop"];
+var img = {shop:"prout",equip:"salope",boxe0:"boxe0",boxe1:"boxe1",boxe2:"boxe1",boxe3:"boxe0",boxe4:"boxe0",boxe5:"boxe0",boxe6:"boxe1",boxe7:"boxe1",boxe8:"boxe0",boxe9:"boxe0",boxe10:"boxe0",play:"play",buy:"randomJoke"};
+var imgLoad = ["shop","equip","boxe0","boxe1","boxe2","boxe3","boxe4","boxe5","boxe6","boxe7","boxe8","boxe9","boxe10","play","buy"];
 imgLoad.forEach(
     function(e,i){
         img[e] = new Image();
@@ -46,7 +45,10 @@ var sens = 1;
 var shop = 0;
 var son = new Audio("music.ogg");
 var mode = 0;
-var argent = JSON.parse(window.localStorage.getItem("argent"));;
+var argent = JSON.parse(window.localStorage.getItem("argent"));
+var ships = JSON.parse(window.localStorage.getItem("ships"));
+if (ships == undefined) ships = [[0,1],[100,0],[1000,0],[1000,0],[1200,0],[100,0],[1000,0],[1000,0],[2000,0],[1000,0],[2000,0]];
+var shopData = {n:0};
 
 // programme
 
@@ -60,7 +62,7 @@ function resize(){
     canvas.setAttribute("width",W);
     canvas.setAttribute("height",H);
     planetSize = H/4;
-    if (planetSize < 0) planetSize = 10;
+    if (planetSize < 10) planetSize = 10;
     scaleFactor = H/800;
 }
 
@@ -84,20 +86,35 @@ function start(){
     document.addEventListener(
         "touchstart",
         function (event){
+            event.stopPropagation();
+            event.preventDefault();
+            event = event.changedTouches[0];
             var x = event.clientX;
             var y = event.clientY;
-            resize();
+            //resize();
             if (mode == 0) smartPhoneMode();
             touching(x,y);
             
+        },
+        false
+    );
+    document.addEventListener(
+        "mousedown",
+        function (event){
+            if (mode > 0) return;
+            var x = event.clientX;
+            var y = event.clientY;
+            touching(x,y);            
         }
     );
-        document.addEventListener(
-        "mousedown",
-            function (event){
+    document.addEventListener(
+        "mousemove",
+        function (event){
+            if (shop > 0){
                 var x = event.clientX;
                 var y = event.clientY;
-                touching(x,y);            
+                analyseShop(x,y);
+            }
         }
     );
     mouse[1] = W/2;
@@ -118,30 +135,64 @@ function touching(x,y){
         if (mouse[0] > 0 )gravite = -9;
     }
     else {
-        if ((x-W/2)*(x-W/2) + (y-H)*(y-H) < planetSize*planetSize){
-            if (record == 1883){
-                alert("Bienvenue au magasin. Vous possédez actuellement "+argent+ " engrenages. Mais croyez moi cela ne va pas durer.");
-                shop = 1;
+        if (shop == 0){
+            if ((x-W/2)*(x-W/2) + (y-H)*(y-H) < planetSize*planetSize){
+                if (record == 1883){
+                    alert("Bienvenue au magasin. Vous possédez actuellement "+argent+ " engrenages. Mais croyez moi cela ne va pas durer.");
+                    shop = 1;
+                }
+                else alert("Cette fonctionnalité est en cours de developpement. En attendant vous pouvez toujours faire des dons. A 5€, il est prévu que sorte la version deluxe du jeu.");
             }
-            else alert("Cette fonctionnalité est en cours de developpement. En attendant vous pouvez toujours faire des dons. A 5€, il est prévu que sorte la version deluxe du jeu.");
+            else if (ready == 0){
+                disalert();
+                dead = 0;
+                t3 = 0;
+                v = 1000;
+                sens = 1;
+                mouse[0] = H/2;
+                scrollX = 0;
+                init = 0;
+                gravite = -9;
+                if (mode == 0){
+                    object = [{r:3.7,y:300,s:30},{r:2,y:150,s:50},{r:2.1,y:400,s:15},{r:3.4,y:100,s:9},{r:3.7,y:300,s:30},{r:2.5,y:150,s:70},{r:4.1,y:100,s:5},{r:1.4,y:50,s:18},{r:5.7,y:240,s:25},{r:5.5,y:10,s:18},{r:2.7,y:240,s:25},{r:1.4,y:50,s:18},{r:-1.5,y:240,s:14},{r:3.5,y:10,s:18},{r:3.7,y:240,s:45}];
+                }
+                else {
+                    object = [{r:3.7,y:300,s:30},{r:2,y:150,s:50},{r:2.1,y:400,s:15},{r:3.4,y:100,s:9},{r:2.5,y:150,s:70},{r:4.1,y:100,s:5},{r:5.7,y:240,s:25},{r:5.5,y:10,s:18},{r:1.4,y:50,s:18},{r:-1.5,y:240,s:14},{r:3.7,y:240,s:45}];
+                }
+                engre = [{r:1,y:300,s:0},{r:2,y:150,s:0},{r:3,y:400,s:0},{r:4,y:100,s:0},{r:5,y:300,s:0},{r:6,y:400,s:0},{r:7,y:100,s:0}];
+            }
         }
-        else if (ready == 0){
-            disalert();
-            dead = 0;
-            t3 = 0;
-            v = 1000;
-            sens = 1;
-            mouse[0] = H/2;
-            scrollX = 0;
-            init = 0;
-            gravite = -9;
-            if (mode == 0){
-                object = [{r:3.7,y:300,s:30},{r:2,y:150,s:50},{r:2.1,y:400,s:15},{r:3.4,y:100,s:9},{r:3.7,y:300,s:30},{r:2.5,y:150,s:70},{r:4.1,y:100,s:5},{r:1.4,y:50,s:18},{r:5.7,y:240,s:25},{r:5.5,y:10,s:18},{r:2.7,y:240,s:25},{r:1.4,y:50,s:18},{r:-1.5,y:240,s:14},{r:3.5,y:10,s:18},{r:3.7,y:240,s:45}];
+        else {
+            if (shop == 2){
+                vaisseau.src = "";
+                shop = 4;
+                shopData.n = 0;
+                alert("Vous possedez "+argent+" engrenages. Cet engin est déjà à vous.");
             }
-            else {
-                object = [{r:3.7,y:300,s:30},{r:2,y:150,s:50},{r:2.1,y:400,s:15},{r:3.4,y:100,s:9},{r:2.5,y:150,s:70},{r:4.1,y:100,s:5},{r:5.7,y:240,s:25},{r:5.5,y:10,s:18},{r:1.4,y:50,s:18},{r:-1.5,y:240,s:14},{r:3.7,y:240,s:45}];
+            else if (shop == 4){
+                if (x <= W/4){
+                    shopData.n = (-1+shopData.n+ships.length)%ships.length;
+                    if (ships[shopData.n][1] == 1) alert("Vous possedez "+argent+" engrenages. Cet engin est déjà à vous.");
+                    else alert("Vous possedez "+argent+" engrenages. Ce vaisseau coûte " + ships[shopData.n][0] + " engrenages.");
+                }
+                else if (x >= W-W/4){
+                    shopData.n = (1+shopData.n)%ships.length;
+                    if (ships[shopData.n][1] == 1) alert("Vous possedez "+argent+" engrenages. Cet engin est déjà à vous.");
+                    else alert("Vous possedez "+argent+" engrenages. Ce vaisseau coûte " + ships[shopData.n][0] + " engrenages.");
+                }
+                else if (y > H/4*3){
+                    if (ships[shopData.n][1] == 1){
+                        shop = 0;
+                        vaisseau = shopData.n;
+                    }
+                    else if (argent >= ships[shopData.n][0]){
+                        ships[shopData.n][1] = 1;
+                        argent -= ships[shopData.n][0];
+                        window.localStorage.setItem("argent",JSON.stringify(argent));
+                        window.localStorage.setItem("ships",JSON.stringify(ships));
+                    }
+                }
             }
-            engre = [{r:1,y:300,s:0},{r:2,y:150,s:0},{r:3,y:400,s:0},{r:4,y:100,s:0},{r:5,y:300,s:0},{r:6,y:400,s:0},{r:7,y:100,s:0}];
         }
     }
 }
@@ -216,7 +267,7 @@ function draw(t) {
         ctx.translate(mouse[1],mouse[0]);
         ctx.rotate(Math.atan((mouse[1] - W/2)/(H - mouse[0])));
         ctx.scale(scaleFactor*sens,scaleFactor);
-        ctx.drawImage(vaisseau,- vaisseau.width/2, - vaisseau.height/2);
+        ctx.drawImage(img["boxe"+vaisseau],- img["boxe"+vaisseau].width/2, - img["boxe"+vaisseau].height/2);
         ctx.restore();
     }
 
