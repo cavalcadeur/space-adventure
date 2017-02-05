@@ -198,7 +198,15 @@ function touching(x,y,z){
             }
         }
         else {
-            if (shop == 2){
+            if (shop == 1){
+                if (x > W/8 && x < W/8+W/4 && y > H/4 && y < H/4*3){
+                    shop = 4;
+                }
+                else if (x > W/8+W/2 && x < W/8+W/2+W/4 && y > H/4 && y < H/4*3){
+                    shop = 5;
+                }
+            }
+            else if (shop == 2){
                 vaisseau.src = "";
                 shop = 4;
                 shopData.n = 0;
@@ -266,9 +274,9 @@ function touching(x,y,z){
                         disalert();
                         //vaisseau = shopData.n;
                     }
-                    else if (argent >= 1500){
+                    else if (argent >= 10){
                         joueur.twoPlayer = 2;
-                        argent -= 1500;
+                        argent -= 10;
                         window.localStorage.setItem("argent",JSON.stringify(argent));
                         window.localStorage.setItem("joueur",JSON.stringify(joueur));
                     }
