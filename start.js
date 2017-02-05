@@ -405,7 +405,14 @@ function paint(t){
                 colorC = "rgb(28,134,182)";
                 nImg = 3;
             }
+            else if (h == 4){
+                colorA = "rgb(40,40,40)";
+                colorB = "rgb(0,0,0)";
+                colorC = "rgb(28,134,182)";
+                nImg = 4;
+            }
             joueur.worlds[nImg] = 1;
+            window.localStorage.setItem("joueur",JSON.stringify(joueur));
         }
     }
 }
