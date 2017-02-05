@@ -1,4 +1,4 @@
-function drawShop(){
+function drawShop(t){
     drawFond();
     if (shop == 1){
         ctx.fillStyle = "rgb(0,0,0)";
@@ -74,6 +74,92 @@ function drawShop(){
         }
         else ctx.drawImage(img.buy,W/2-W/8,H-H/8,W/4,H/8);
         ctx.drawImage(img["boxe"+shopData.n],W/2-25,H/2-25);
+    }
+    else if (shop == 5){
+        ctx.fillStyle = colorB;
+        if (joueur.lightSpeed == 0) {
+            alert("Le moteur à improbabilités coûte 1000 engrenages.");
+            ctx.drawImage(img.buy,W/2-W/8,H-H/8,W/4,H/8);
+        }
+        else {
+            alert("Vos vaisseaux sont équipés du moteur à improbabilités.");
+            ctx.drawImage(img.play,W/2-W/8,H-H/8,W/4,H/8);
+        }
+        etoiles.forEach(
+            function (e){
+                var y = e.y;
+                if (y < H/6 || y > H/6*5) y = -500;
+                var x = (W/4)*3 - (e.x+t*4+100*W+20000)%(W/2);
+                drawRayon(x,y);
+            }
+        );
+        ctx.fillStyle = "rgb(0,0,0)";
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(W/8,H/2);
+        ctx.lineTo(W/4,H/2 + W/8);
+        ctx.lineTo(W/4,H/2 - W/8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(W-W/8,H/2);
+        ctx.lineTo(W-W/4,H/2 + W/8);
+        ctx.lineTo(W-W/4,H/2 - W/8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.drawImage(img["boxe"+shopData.n],W/2,H/2+Math.sin(t/500)*5);        
+    }
+    else if (shop == 6){
+        if (joueur.twoPlayer == 0) {
+            alert("Le mode deux joueurs coûte 1500 engrenages.");
+            ctx.drawImage(img.buy,W/2-W/8,H-H/8,W/4,H/8);
+            ctx.drawImage(img["boxe"+shopData.n],W/2,H/2+Math.abs(Math.sin(t/200)*50));
+        }
+        else if (joueur.twoPlayer == 1){
+            alert("Le mode deux joueur est désactivé. Cliquez au centre pour l'activer.");
+            ctx.drawImage(img.play,W/2-W/8,H-H/8,W/4,H/8);
+        }
+        else if (joueur.twoPlayer == 2){
+            alert("Le mode deux joueur est activé. Cliquez au centre pour le désactiver.");
+            ctx.drawImage(img.play,W/2-W/8,H-H/8,W/4,H/8);
+            ctx.drawImage(img["boxe"+shopData.n],W/2,H/2+Math.abs(Math.sin(t/200)*50));
+        }
+        ctx.fillStyle = "rgb(0,0,0)";
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(W/8,H/2);
+        ctx.lineTo(W/4,H/2 + W/8);
+        ctx.lineTo(W/4,H/2 - W/8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(W-W/8,H/2);
+        ctx.lineTo(W-W/4,H/2 + W/8);
+        ctx.lineTo(W-W/4,H/2 - W/8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.drawImage(img["boxe"+shopData.n],W/2,H/2-Math.abs(Math.sin(t/200)*50)); 
+    }
+    else if (shop == 7){
+        alert("Ce menu permet de retourner au jeu.");
+        ctx.fillStyle = "rgb(0,0,0)";
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(W/8,H/2);
+        ctx.lineTo(W/4,H/2 + W/8);
+        ctx.lineTo(W/4,H/2 - W/8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(W-W/8,H/2);
+        ctx.lineTo(W-W/4,H/2 + W/8);
+        ctx.lineTo(W-W/4,H/2 - W/8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.drawImage(img.play,W/2-W/8,H-H/8,W/4,H/8);
     }
 }
 

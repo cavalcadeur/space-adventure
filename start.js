@@ -20,23 +20,22 @@ var t3 = 0;
 var vaisseau = 0;
 var imgBonus = [new Image()];
 imgBonus[0].src = "images/bonus0.png";
-var imgFleur = [new Image(),new Image(),new Image()];
-imgFleur[0].src = "images/fleur0.png";
-imgFleur[1].src = "images/fleur1.png";
-imgFleur[2].src = "images/fleur2.png";
 var eng = new Image();
 eng.src = "images/engre.png";
-var img = {shop:"prout",equip:"salope",boxe0:"boxe0",boxe1:"boxe1",boxe2:"boxe1",boxe3:"boxe0",boxe4:"boxe0",boxe5:"boxe0",boxe6:"boxe1",boxe7:"boxe1",boxe8:"boxe0",boxe9:"boxe0",boxe10:"boxe0",play:"play",buy:"randomJoke"};
-var imgLoad = ["shop","equip","boxe0","boxe1","boxe2","boxe3","boxe4","boxe5","boxe6","boxe7","boxe8","boxe9","boxe10","play","buy"];
+var img = {};
+var imgLoad = ["shop","equip","boxe0","boxe1","boxe2","boxe3","boxe4","boxe5","boxe6","boxe7","boxe8","boxe9","boxe10","play","buy","fleur0","fleur1","fleur2","fleur3","fleur4","fleur5","fleur6","fleur7","fleur8","fleur9","fleur10","fleur11","bonus0","bonus1","bonus2","bonus3"];
 imgLoad.forEach(
     function(e,i){
         img[e] = new Image();
         img[e].src = "images/"+e+".png";
     }
 );
+var joueur = JSON.parse(window.localStorage.getItem("joueur"));
+if (joueur == undefined) joueur = {"lightSpeed":0,"worlds":[1,0,0,0,0],"vaisseau":0,"twoPlayer":0,"version":1};
 var mouse = [0,0];
 var dead = 0;
 var gravite = -9;
+var graviteB = -9;
 var init = 1;
 var ready = 0;
 var scaleFactor = 1;
@@ -47,8 +46,15 @@ var son = new Audio("music.ogg");
 var mode = 0;
 var argent = JSON.parse(window.localStorage.getItem("argent"));
 var ships = JSON.parse(window.localStorage.getItem("ships"));
-if (ships == undefined) ships = [[0,1],[100,0],[1000,0],[1000,0],[1200,0],[100,0],[1000,0],[1000,0],[2000,0],[1000,0],[2000,0]];
+if (ships == undefined) ships = [[0,1],[100,0],[200,0],[500,0],[1000,0],[1500,0],[1600,0],[1700,0],[2000,0],[2500,0],[5000,0]];
 var shopData = {n:0};
+var travel = 0;
+var lim = 100;
+var VX = 0;
+var colorA = "rgb(28,134,182)";
+var colorB = "rgb(255,255,250)";
+var colorC = "rgb(40,40,40)";
+var nImg = 0;
 
 // programme
 
@@ -104,7 +110,7 @@ function start(){
             if (mode > 0) return;
             var x = event.clientX;
             var y = event.clientY;
-            touching(x,y);            
+            touching(x,y,1);            
         }
     );
     document.addEventListener(
@@ -119,6 +125,7 @@ function start(){
     );
     mouse[1] = W/2;
     mouse[0] = H/2;
+    vaisseau = joueur.vaisseau;
     if (argent == undefined) argent = 0;
     for (var i = 0;i < 20;i++){
         etoiles.push({x:rnd(W),y:rnd(H),n:rnd(3)});
@@ -129,10 +136,26 @@ function start(){
     animation();
 }
 
-function touching(x,y){
+function touching(x,y,z){
     if (x == undefined) {x = -9000;y=-9000;}
     if (dead == 0){
-        if (mouse[0] > 0 )gravite = -9;
+        if (joueur.twoPlayer == 2){
+            if (mode == 1){
+                if (x < W/2) {
+                    if (mouse[2] > 0 )graviteB = -9;
+                }
+                else if (mouse[0] > 0 )gravite = -9;
+            }
+            else {
+                if (z == 1){
+                    if (mouse[2] > 0 )graviteB = -9;
+                }
+                else if (mouse[0] > 0 )gravite = -9;
+            }
+        }
+        else{
+            if (mouse[0] > 0 )gravite = -9;
+        }
     }
     else {
         if (shop == 0){
@@ -146,10 +169,22 @@ function touching(x,y){
             else if (ready == 0){
                 disalert();
                 dead = 0;
+                lim = 30;
                 t3 = 0;
+                travel = 0;
                 v = 1000;
                 sens = 1;
+                mouse[1] = W/2;
                 mouse[0] = H/2;
+                if (joueur.twoPlayer == 2){
+                    mouse[1] += 25;
+                    mouse[2] = H/2;
+                    mouse[3] = W/2 - 25;
+                }
+                else {
+                    mouse[2] = 0;
+                    mouse[3] = 0;
+                }
                 scrollX = 0;
                 init = 0;
                 gravite = -9;
@@ -169,6 +204,9 @@ function touching(x,y){
                 shopData.n = 0;
                 alert("Vous possedez "+argent+" engrenages. Cet engin est déjà à vous.");
             }
+            else if (shop == 3){
+                shop = 5;
+            }
             else if (shop == 4){
                 if (x <= W/4){
                     shopData.n = (-1+shopData.n+ships.length)%ships.length;
@@ -183,6 +221,7 @@ function touching(x,y){
                 else if (y > H/4*3){
                     if (ships[shopData.n][1] == 1){
                         shop = 0;
+                        disalert();
                         vaisseau = shopData.n;
                     }
                     else if (argent >= ships[shopData.n][0]){
@@ -191,6 +230,66 @@ function touching(x,y){
                         window.localStorage.setItem("argent",JSON.stringify(argent));
                         window.localStorage.setItem("ships",JSON.stringify(ships));
                     }
+                }
+            }
+            else if (shop == 5){
+                if (x <= W/4){
+                    shop = 7;
+                }
+                else if (x >= W-W/4){
+                    shop = 6;
+                }
+                else if (y > H/4*3){
+                    if (joueur.lightSpeed == 1){
+                        shop = 0;
+                        disalert();
+                        //vaisseau = shopData.n;
+                    }
+                    else if (argent >= 1000){
+                        joueur.lightSpeed = 1;
+                        argent -= 1000;
+                        window.localStorage.setItem("argent",JSON.stringify(argent));
+                        window.localStorage.setItem("joueur",JSON.stringify(joueur));
+                    }
+                }
+            }
+            else if (shop == 6){
+                if (x <= W/4){
+                    shop = 5;
+                }
+                else if (x >= W-W/4){
+                    shop = 7;
+                }
+                else if (y > H/4*3){
+                    if (joueur.twoPlayer >= 1){
+                        shop = 0;
+                        disalert();
+                        //vaisseau = shopData.n;
+                    }
+                    else if (argent >= 1500){
+                        joueur.twoPlayer = 2;
+                        argent -= 1500;
+                        window.localStorage.setItem("argent",JSON.stringify(argent));
+                        window.localStorage.setItem("joueur",JSON.stringify(joueur));
+                    }
+                }
+                else {
+                    if (joueur.twoPlayer == 1) joueur.twoPlayer = 2;
+                    else if (joueur.twoPlayer == 2) joueur.twoPlayer = 1;
+                }
+            }
+            else if (shop == 7){
+                if (x <= W/4){
+                    shop = 6;
+                }
+                else if (x >= W-W/4){
+                    shop = 5;
+                }
+                else{
+                    shop = 0;
+                    window.localStorage.setItem("joueur",JSON.stringify(joueur));
+                    disalert();
+                    //vaisseau = shopData.n;
                 }
             }
         }
@@ -207,7 +306,7 @@ function animation(){
             }
         }
         else {
-            drawShop();
+            drawShop(t);
         }
         window.requestAnimationFrame(f);
     };
@@ -230,38 +329,123 @@ function paint(t){
     if (((bonus.r - scrollX)*sens)%(Math.PI*2) < -3 && ((bonus.r - scrollX)*sens)%(Math.PI*2) > -3.4){
         bonus.on = 1;
         bonus.y = rnd(H);
-    }  
-    scrollX += (t-t2)/v * sens;
-    t3 += t-t2;
-    v -= (t-t2)/700;
-    mouse[0] += gravite;
-    gravite += 0.05 * (t-t2);
-    draw(t);
-    collision(t3);
+    }
+    if (travel == 0){
+        scrollX += (t-t2)/v * sens;
+        t3 += t-t2;
+        v -= (t-t2)/700;
+        mouse[0] += gravite;
+        gravite += 0.05 * (t-t2);
+        if (gravite > 12) gravite = 12;
+        mouse[2] += graviteB;
+        graviteB += 0.05 * (t-t2);
+        if (graviteB > 12) graviteB = 12;
+        draw(t);
+        collision(t3);
+        if (joueur.lightSpeed == 1){
+            if (t3/1000 > lim){
+                gravite = 0;
+                travel = 4000;
+                lim += 30;
+                VX = 0;
+            }
+        }
+    }
+    else {
+        if (travel > 0){
+            scrollX += (t-t2)/v * sens;
+            t3 += t-t2;
+            v -= (t-t2)/700;
+            travel -= t-t2;
+            t2 = t;
+            drawTravel(travel);
+        }
+        else {
+            if (mode == 0){
+                    object = [{r:3.7,y:rnd(H),s:30},{r:2,y:rnd(H),s:50},{r:2.1,y:rnd(H),s:15},{r:3.4,y:rnd(H),s:9},{r:3.7,y:rnd(H),s:30},{r:2.5,y:rnd(H),s:70},{r:4.1,y:rnd(H),s:5},{r:1.4,y:rnd(H),s:18},{r:5.7,y:rnd(H),s:25},{r:5.5,y:rnd(H),s:18},{r:2.7,y:rnd(H),s:25},{r:1.4,y:rnd(H),s:18},{r:-1.5,y:rnd(H),s:14},{r:3.5,y:rnd(H),s:18},{r:3.7,y:rnd(H),s:45}];
+            }
+            else {
+                object = [{r:3.7,y:rnd(H),s:10},{r:2,y:rnd(H),s:20},{r:2.1,y:rnd(H),s:15},{r:3.4,y:rnd(H),s:9},{r:2.5,y:rnd(H),s:32},{r:4.1,y:rnd(H),s:5},{r:5.7,y:rnd(H),s:25},{r:5.5,y:rnd(H),s:18},{r:1.4,y:rnd(H),s:18},{r:-1.5,y:rnd(H),s:14},{r:3.7,y:rnd(H),s:5}];
+            }
+            scrollX = 0;
+            travel = 0;
+            //var h = rnd(3);
+            var h = 3;
+            if (h == 0){
+                colorA = "rgb(0,0,30)";
+                colorB = "rgb(250,250,50)";
+                colorC = "rgb(100,70,70)";
+                nImg = 1;
+            }
+            else if (h == 1){
+                colorA = "rgb(28,134,182)";
+                colorB = "rgb(255,255,250)";
+                colorC = "rgb(40,40,40)";
+                nImg = 0;
+            }
+            else if (h == 2){
+                colorA = "rgb(200,200,200)";
+                colorB = "rgb(0,0,0)";
+                colorC = "rgb(0,0,0)";
+                nImg = 2;
+            }
+            else if (h == 3){
+                colorA = "rgb(40,40,40)";
+                colorB = "rgb(0,0,0)";
+                colorC = "rgb(28,134,182)";
+                nImg = 3;
+            }
+            joueur.worlds[nImg] = 1;
+        }
+    }
 }
 
 function draw(t) {
     t2 = t;
     drawFond();
-    engre.forEach(
-        function(e){
-            if (e.s == 0){
-                ctx.save();
-                ctx.translate(W/2,H);
-                ctx.rotate(e.r - scrollX);
-                ctx.drawImage(eng,0,-e.y - planetSize);
-                ctx.restore();
-                var x = (e.y+planetSize) * Math.sin((e.r - scrollX)%(Math.PI*2)) + W/2;
-                var y = H - ((e.y+planetSize) * Math.cos((e.r - scrollX)%(Math.PI*2)));
-                if (Math.hypot(mouse[0] - y,mouse[1] - x) < 20 + 20*scaleFactor){argent += 1;e.s = 1;}
+    if (joueur.twoPlayer == 2){
+        engre.forEach(
+            function(e){
+                if (e.s == 0){
+                    ctx.save();
+                    ctx.translate(W/2,H);
+                    ctx.rotate(e.r - scrollX);
+                    ctx.drawImage(eng,0,-e.y - planetSize);
+                    ctx.restore();
+                    var x = (e.y+planetSize) * Math.sin((e.r - scrollX)%(Math.PI*2)) + W/2;
+                    var y = H - ((e.y+planetSize) * Math.cos((e.r - scrollX)%(Math.PI*2)));
+                    if (Math.hypot(mouse[0] - y,mouse[1] - x) < 20 + 20*scaleFactor){argent += 1;e.s = 1;}
+                    else if (Math.hypot(mouse[2] - y,mouse[3] - x) < 20 + 20*scaleFactor){argent += 1;e.s = 1;}
+                }
+                else {
+                    if (((e.r - scrollX)*sens)%(Math.PI*2) < -3 && ((e.r - scrollX)*sens)%(Math.PI*2) > -3.4){
+                        e.s = 0;
+                    }  
+                }
             }
-            else {
-                if (((e.r - scrollX)*sens)%(Math.PI*2) < -3 && ((e.r - scrollX)*sens)%(Math.PI*2) > -3.4){
-                    e.s = 0;
-                }  
+        );
+    }
+    else {
+        engre.forEach(
+            function(e){
+                if (e.s == 0){
+                    ctx.save();
+                    ctx.translate(W/2,H);
+                    ctx.rotate(e.r - scrollX);
+                    ctx.drawImage(eng,0,-e.y - planetSize);
+                    ctx.restore();
+                    var x = (e.y+planetSize) * Math.sin((e.r - scrollX)%(Math.PI*2)) + W/2;
+                    var y = H - ((e.y+planetSize) * Math.cos((e.r - scrollX)%(Math.PI*2)));
+                    if (Math.hypot(mouse[0] - y,mouse[1] - x) < 20 + 20*scaleFactor){argent += 1;e.s = 1;}
+                }
+                else {
+                    if (((e.r - scrollX)*sens)%(Math.PI*2) < -3 && ((e.r - scrollX)*sens)%(Math.PI*2) > -3.4){
+                        e.s = 0;
+                    }  
+                }
             }
-        }
-    );
+        );
+    }
     if (dead == 0){
         ctx.save();
         ctx.translate(mouse[1],mouse[0]);
@@ -269,6 +453,14 @@ function draw(t) {
         ctx.scale(scaleFactor*sens,scaleFactor);
         ctx.drawImage(img["boxe"+vaisseau],- img["boxe"+vaisseau].width/2, - img["boxe"+vaisseau].height/2);
         ctx.restore();
+        if (joueur.twoPlayer == 2){
+            ctx.save();
+            ctx.translate(mouse[3],mouse[2]);
+            ctx.rotate(Math.atan((mouse[3] - W/2)/(H - mouse[2])));
+            ctx.scale(scaleFactor*sens,scaleFactor);
+            ctx.drawImage(img["boxe"+vaisseau],- img["boxe"+vaisseau].width/2, - img["boxe"+vaisseau].height/2);
+            ctx.restore();
+        }
     }
 
 //    if (dead == 0) ctx.drawImage(vaisseau,mouse[1]  - vaisseau.width/2,mouse[0] - vaisseau.height/2);
@@ -276,10 +468,10 @@ function draw(t) {
         ctx.save();
         ctx.translate(W/2,H);
         ctx.rotate(bonus.r - scrollX);
-        ctx.drawImage(imgBonus[bonus.t],0,-bonus.y - 15 - planetSize);
+        ctx.drawImage(img["bonus"+nImg],0,-bonus.y - img["bonus"+nImg].height/2 - planetSize);
         ctx.restore();        
     }
-    ctx.fillStyle = "rgb(40,40,40)";
+    ctx.fillStyle = colorC;
     object.forEach(
         function(e){
             ctx.save();
@@ -307,7 +499,7 @@ function draw(t) {
             ctx.save();
             ctx.translate(x,y);
             ctx.rotate(e.r - scrollX);
-            ctx.drawImage(imgFleur[e.t],- 25,- 45 - s);
+            ctx.drawImage(img["fleur" + (e.t+nImg*3)],- 25,- 45 - s);
             ctx.restore();
         }
     );
@@ -322,11 +514,67 @@ function draw(t) {
     }
 }
 
-function drawFond() {
-    ctx.fillStyle = "rgb(28,134,182)";
+function drawTravel(t){
+    var at = 4000-t;
+    ctx.fillStyle = colorA;
     ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = "rgb(255,255,250)";
-    ctx.globalAlpha = 0.4;
+    ctx.fillStyle = colorB;
+    if (t >= 1000 && t < 3000){
+        VX += 200*sens;
+        etoiles.forEach(
+            function (e){
+                var y = e.y;
+                var x = W+100 - (e.x+VX+100*W+20000)%(W+200);
+                drawRayon(x,y);
+            }
+        );
+    }
+    else if (t >= 3000){
+        VX += at/5*sens;
+        etoiles.forEach(
+            function (e){
+                var y = e.y;
+                var x = W+100 - (e.x+VX+100*W+20000)%(W+200);
+                drawRayon(x,y);
+            }
+        );
+    }
+    else if (t < 1000){
+        VX += t/5*sens;
+        etoiles.forEach(
+            function (e){
+                var y = e.y;
+                var x =  W+100 - (e.x+VX+100*W+20000)%(W+200);
+                drawRayon(x,y);
+            }
+        );
+    }
+    ctx.save();
+    ctx.translate(mouse[1],mouse[0]);
+    ctx.rotate(Math.atan((mouse[1] - W/2)/(H - mouse[0])));
+    ctx.scale(scaleFactor*sens,scaleFactor);
+    ctx.drawImage(img["boxe"+vaisseau],- img["boxe"+vaisseau].width/2, - img["boxe"+vaisseau].height/2);
+    ctx.restore();
+}
+
+function drawRayon(x,y){
+
+    ctx.beginPath();
+    ctx.moveTo(x,y-2);
+    ctx.lineTo(x-100,y);
+    ctx.lineTo(x,y+2);
+    ctx.lineTo(x+100,y);
+    ctx.closePath();
+     ctx.fill();
+
+    //ctx.fillRect(x-50,y-2,100,4);
+}
+
+function drawFond() {
+    ctx.fillStyle = colorA;
+    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = colorB;
+    //ctx.globalAlpha = 0.4;
     etoiles.forEach(
         function(e){
             if (e.n == 0 | e.n == 2) ctx.fillRect(e.x,e.y,3,3);
@@ -345,28 +593,81 @@ function drawFond() {
             }
         }
     );
-    ctx.globalAlpha = 1;
+    //ctx.globalAlpha = 1;
 }
 
 function collision(t) {
     if (bonus.on == 1){
         var x = (bonus.y+planetSize) * Math.sin((bonus.r - scrollX)%(Math.PI*2)) + W/2;
         var y = H - ((bonus.y+planetSize) * Math.cos((bonus.r - scrollX)%(Math.PI*2)));
-        if (Math.hypot(mouse[0] - y,mouse[1] - x) < 15 + 20*scaleFactor){sens = sens*-1;bonus.on = 0;}
-    }
-    if (Math.hypot(mouse[0] - H,mouse[1] - W/2) < planetSize + 20*scaleFactor) mort(t);
-//    ctx.fillStyle = "rgb(255,255,255)";
-    object.forEach(
-        function(e){
-            var x = (e.y+planetSize) * Math.sin((e.r - scrollX)%(Math.PI*2)) + W/2;
-            var y = H - ((e.y+planetSize) * Math.cos((e.r - scrollX)%(Math.PI*2)));
-            //ctx.fillRect(x,y,5,5);
-            if (Math.hypot(mouse[0] - y,mouse[1] - x) < e.s + 20*scaleFactor) mort(t);
+        if (Math.hypot(mouse[0] - y,mouse[1] - x) < img["bonus"+nImg].height/2 + 20*scaleFactor){
+            bonus.on = 0;
+            if (nImg == 0) sens = sens*-1;
+            else if (nImg == 1) argent += 10;
+            else if (nImg == 2) bonus.on = 1;
+            else if (nImg == 3) {
+                object.forEach(
+                    function(e){
+                        e.s = e.s/2;
+                    }
+                );
+            }
         }
-    );
+        if (joueur.twoPlayer == 2){
+            if (Math.hypot(mouse[2] - y,mouse[3] - x) < img["bonus"+nImg].height/2 + 20*scaleFactor){
+                bonus.on = 0;
+                if (nImg == 0) sens = sens*-1;
+                else if (nImg == 1) argent += 10;
+                else if (nImg == 2) bonus.on = 1;
+                else if (nImg == 3) {
+                    object.forEach(
+                        function(e){
+                            e.s = e.s/2;
+                        }
+                    );
+                }
+            }
+        }
+        if (nImg == 2){
+            var poids = 20/(H/15+10);
+            if (mouse[0] < y) mouse[0] += poids;
+            else mouse[0] -= poids;
+            if (mouse[1] < x) mouse[1] += poids;
+            else mouse[1] -= poids;
+            if (mouse[2] < y) mouse[2] += poids;
+            else mouse[2] -= poids;
+            if (mouse[3] < x) mouse[3] += poids;
+            else mouse[3] -= poids;
+        }
+    }
+    //    ctx.fillStyle = "rgb(255,255,255)";
+    if (joueur.twoPlayer == 2){
+        if (Math.hypot(mouse[0] - H,mouse[1] - W/2) < planetSize + 20*scaleFactor) mort(t,0);
+        else if (Math.hypot(mouse[2] - H,mouse[3] - W/2) < planetSize + 20*scaleFactor) mort(t,1);
+        object.forEach(
+            function(e){
+                var x = (e.y+planetSize) * Math.sin((e.r - scrollX)%(Math.PI*2)) + W/2;
+                var y = H - ((e.y+planetSize) * Math.cos((e.r - scrollX)%(Math.PI*2)));
+                //ctx.fillRect(x,y,5,5);
+                if (Math.hypot(mouse[0] - y,mouse[1] - x) < e.s + 20*scaleFactor) mort(t,0);
+                else if (Math.hypot(mouse[2] - y,mouse[3] - x) < e.s + 20*scaleFactor) mort(t,1);
+            }
+        );
+    }
+    else {
+        if (Math.hypot(mouse[0] - H,mouse[1] - W/2) < planetSize + 20*scaleFactor) mort(t,0);
+        object.forEach(
+            function(e){
+                var x = (e.y+planetSize) * Math.sin((e.r - scrollX)%(Math.PI*2)) + W/2;
+                var y = H - ((e.y+planetSize) * Math.cos((e.r - scrollX)%(Math.PI*2)));
+                //ctx.fillRect(x,y,5,5);
+                if (Math.hypot(mouse[0] - y,mouse[1] - x) < e.s + 20*scaleFactor) mort(t,0);
+            }
+        );
+    }
 }
 
-function mort(t){
+function mort(t,NN){
     window.localStorage.setItem("argent",JSON.stringify(argent));
     dead = 1;
     if (Math.round(t/1000) == 1) var pluriel = "";
@@ -381,11 +682,12 @@ function mort(t){
     else {
         score = "Vous avez tenu " + Math.round(t/1000) + " seconde"+pluriel+". Votre record est de " + record + " seconde"+pluriel2+". Vous avez "+ argent+" engrenages.";
     }
+    window.localStorage.setItem("joueur",JSON.stringify(joueur));
     alert(score);
     ready = 20;
     for (var iii = 0; iii < 10; iii++) {
         var taille = rnd(100) + 100;
-        newExplosion(mouse[1] - 40 + rnd(20) + "px",mouse[0] - 95 + rnd(20)  + "px",mouse[1] - 150 + rnd(200) + "px",mouse[0] - 205 + rnd(200)+ "px", taille + "px",0,1);
+        newExplosion(mouse[1+2*NN] - 40 + rnd(20) + "px",mouse[0+2*NN] - 95 + rnd(20)  + "px",mouse[1+2*NN] - 150 + rnd(200) + "px",mouse[0+2*NN] - 205 + rnd(200)+ "px", taille + "px",0,1);
     }
 }
 
