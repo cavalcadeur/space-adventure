@@ -274,9 +274,9 @@ function touching(x,y,z){
                         disalert();
                         //vaisseau = shopData.n;
                     }
-                    else if (argent >= 10){
+                    else if (argent >= 1500){
                         joueur.twoPlayer = 2;
-                        argent -= 10;
+                        argent -= 1500;
                         window.localStorage.setItem("argent",JSON.stringify(argent));
                         window.localStorage.setItem("joueur",JSON.stringify(joueur));
                     }
