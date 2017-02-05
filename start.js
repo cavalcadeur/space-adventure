@@ -231,6 +231,8 @@ function touching(x,y,z){
                         shop = 0;
                         disalert();
                         vaisseau = shopData.n;
+                        joueur.vaisseau = shopData.n;
+                        window.localStorage.setItem("joueur",JSON.stringify(joueur));
                     }
                     else if (argent >= ships[shopData.n][0]){
                         ships[shopData.n][1] = 1;
