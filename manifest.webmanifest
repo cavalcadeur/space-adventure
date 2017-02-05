@@ -1,7 +1,7 @@
 {
   "name": "Space Adventure",
   "short_name": "SpaceAdv",
-  "start_url": ".",
+  "start_url": "https://cavalcadeur.github.io/space-adventure/",
   "display": "standalone",
   "background_color": "#fff",
   "description": "Obviously the best game ever !",
