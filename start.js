@@ -160,11 +160,11 @@ function touching(x,y,z){
     else {
         if (shop == 0){
             if ((x-W/2)*(x-W/2) + (y-H)*(y-H) < planetSize*planetSize){
-                if (record == 1883){
+                //if (record == 1883){
                     alert("Bienvenue au magasin. Vous possédez actuellement "+argent+ " engrenages. Mais croyez moi cela ne va pas durer.");
                     shop = 1;
-                }
-                else alert("Cette fonctionnalité est en cours de developpement. En attendant vous pouvez toujours faire des dons. A 5€, il est prévu que sorte la version deluxe du jeu.");
+               // }
+                //else alert("Cette fonctionnalité est en cours de developpement. En attendant vous pouvez toujours faire des dons. A 5€, il est prévu que sorte la version deluxe du jeu.");
             }
             else if (ready == 0){
                 disalert();
