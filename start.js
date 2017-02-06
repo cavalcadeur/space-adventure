@@ -379,7 +379,7 @@ function paint(t){
             }
             scrollX = 0;
             travel = 0;
-            var h = rnd(3);
+            var h = rnd(4);
             //var h = 3;
             if (h == 0){
                 colorA = "rgb(0,0,30)";
